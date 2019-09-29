@@ -1,0 +1,16 @@
+{
+    "short_name": "Maps",
+    "name": "Google Maps",
+    "icons": [
+      {
+        "src": "/images/pokeball.png",
+        "type": "image/png",
+        "sizes": "286x286"
+      }
+    ],
+    "start_url": "/",
+    "background_color": "#3367D6",
+    "display": "standalone",
+    "scope": "/",
+    "theme_color": "#3367D6"
+  }
