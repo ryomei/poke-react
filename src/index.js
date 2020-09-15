@@ -1,18 +1,28 @@
-import React from 'react'
-import ReactDOM from 'react-dom'
-import '../src/styles/index.css'
-import App from '../src/components/App'
-import { ApolloProvider } from 'react-apollo'
-import ApolloClient from 'apollo-boost'
+import React from "react";
+import ReactDOM from "react-dom";
+import "./styles/index.css";
+import App from "../src/components/App";
+import { ApolloClient, InMemoryCache, ApolloProvider } from "@apollo/client";
+
+const PUBLIC_APIS = {
+  backupList: [
+    "https://graphql-pokemon.now.sh",
+    "https://pokeapi-graphiql.herokuapp.com",
+    "https://mazipan-gql-pokeapi.herokuapp.com/graphql",
+  ],
+  uri: "https://mazipan-gql-pokeapi.herokuapp.com/graphql",
+};
 
 const client = new ApolloClient({
-  uri: 'https://graphql-pokemon.now.sh',
-})
+  uri: PUBLIC_APIS.uri,
+  cache: new InMemoryCache(),
+});
 
-//Apollo Client
 ReactDOM.render(
-  <ApolloProvider client={client}>
-    <App />
-  </ApolloProvider>,
-  document.getElementById('root'),
-)
+  <React.StrictMode>
+    <ApolloProvider client={client}>
+      <App />
+    </ApolloProvider>
+  </React.StrictMode>,
+  document.getElementById("root")
+);

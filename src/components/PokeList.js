@@ -1,80 +1,72 @@
-import React, { Component } from "react";
-import { Query } from "react-apollo";
-import { gql } from "apollo-boost";
+import React, { useState, useEffect } from "react";
+import { useQuery } from "@apollo/client";
 import "../styles/PokeList.css";
+import { POKEMONS_QUERY } from "./../queries/poke-queries";
+import Pokemon from "./../models/pokemon";
+import { makeStyles } from "@material-ui/core/styles";
+import {  
+  GridList,
+  GridListTile,
+  GridListTileBar,
+} from "@material-ui/core";
 
-export default class PokeList extends Component {
-  renderPokemon(pokemon) {
-    return (
-      <ul>
-        <li key={pokemon.id} className="pokecard">
-          <section>
-            <header>
-              {pokemon.name} #({pokemon.number})
-            </header>
-            <div className="pokeball">
-              <img src={pokemon.image} />
-            </div>
-            <footer>
-              <table>
-                <tbody class="poke-info-rows">
-                  <tr>
-                    <td>Classificação</td>
-                    <td>{pokemon.classification}</td>
-                  </tr>
-                  <tr>
-                    <td>Tipos</td>
-                    <td>{pokemon.types.join(", ")}</td>
-                  </tr>
-                  <tr>
-                    <td>Fraco contra</td>
-                    <td>{pokemon.weaknesses.join(", ")}</td>
-                  </tr>
-                  <tr>
-                    <td>Taxa de fuga</td>
-                    <td>{pokemon.fleeRate}</td>
-                  </tr>
-                </tbody>
-              </table>
-            </footer>
-          </section>
-        </li>
-      </ul>
-    );
-  }
+const useStyles = makeStyles((theme) => ({
+  root: {
+    display: "flex",
+    flex: 1,
+    justifyContent: "space-around",
+    overflow: "hidden",
+    backgroundColor: theme.palette.background.paper,
+  },
+  gridList: {
+    // Promote the list into his own layer on Chrome. This cost memory but helps keeping high FPS.
+    transform: "translateZ(0)",
+  },
+  title: {
+    color: theme.palette.primary.main,
+    textTransform: "capitalize"
+  },
+  titleBar: {
+    background:
+      "linear-gradient(to top, rgba(100,100,100,0.7) 0%, rgba(100,100,100,0.3) 70%, rgba(0,0,0,0) 100%)",
+  },
+}));
 
-  render() {
-    return (
-      <Query query={POKEMONS_QUERY}>
-        {props => {
-          console.log(props);
-          const { data, loading, error } = props;
-          if (loading) {
-            return <div>Loading</div>;
-          }
+const PokeList = () => {
+  const classes = useStyles();
 
-          if (error) {
-            return <div>An unexpected error occurred</div>;
-          }
+  // States
+  const [pokemons, setPokemons] = useState([]);
+  const { data } = useQuery(POKEMONS_QUERY, {
+    variables: {
+      limit: 20,
+      offset: 1,
+    },
+    fetchPolicy: "cache-and-network",
+  });
 
-          return <ul>{data.pokemons.map(this.renderPokemon)}</ul>;
-        }}
-      </Query>
-    );
-  }
-}
+  // Effects
+  useEffect(() => {
+    if (!data) return;
+    const pokemongos = data.pokemons.results.map((data) => new Pokemon(data));
+    setPokemons(pokemongos);
+  }, [data]);
 
-const POKEMONS_QUERY = gql`
-  query pokemons {
-    pokemons(first: 151) {
-      id
-      number
-      name
-      image
-      classification
-      types
-      weaknesses
-      fleeRate
-    }
-  }
-`;
+  return (
+    <div className={classes.root}>
+      <GridList className={classes.gridList} cols={2.5}>
+        {pokemons.map((pokemon) => (
+          <GridListTile key={pokemon.id}>
+            <img src={pokemon.image} alt="mongo" />
+            <GridListTileBar
+              title={pokemon.name}
+              classes={{ root: classes.titleBar, title: classes.title }}
+            />
+          </GridListTile>
+        ))}
+      </GridList>
+    </div>
+  );
+};
+
+export default PokeList;
